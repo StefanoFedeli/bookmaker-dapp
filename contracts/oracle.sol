@@ -12,7 +12,7 @@ contract APIConsumer is ChainlinkClient {
     bytes32 private jobId;
     uint256 private fee;
     string private focus;
-    mapping (string => bool) private TEAM_MAP;
+    mapping (string => uint8) private TEAM_MAP;
     
     /**
      * Network: Kovan
@@ -23,7 +23,7 @@ contract APIConsumer is ChainlinkClient {
     constructor() public {
         setPublicChainlinkToken();
         oracle = 0x83F00b902cbf06E316C95F51cbEeD9D2572a349a;
-        jobId = "73aded001b274500b5822c785b757965";
+        jobId = "c179a8180e034cf5a341488406c32827";
         fee = 0.1 * 10 ** 18; // 0.1 LINK
     }
     
@@ -39,13 +39,13 @@ contract APIConsumer is ChainlinkClient {
      *         ---- https://docs.chain.link/docs/fund-your-contract -----               *
      *                                                                                  *
      ************************************************************************************/
-    function isTeamOutAtStage(string _team, int8 stage) public returns (bytes32 requestId) {
+    function isTeamOutAtStage(string memory _team) public returns (bytes32 requestId) {
 
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
         focus = _team;
         
         // Set the URL to perform the GET request on
-        request.add("get", "https://raw.githubusercontent.com/StefanoFedeli/LineQueue/master/contracts/EURO2020.json");
+        request.add("get", "https://raw.githubusercontent.com/StefanoFedeli/bookmaker-dapp/master/contracts/EURO2020.json");
         
         // Set the path to find the desired data in the API response, where the response format is:
         // {"ITA": true, "ENG": false, ....}
@@ -58,14 +58,14 @@ contract APIConsumer is ChainlinkClient {
     /**
      * Receive the response in the form of uint256
      */ 
-    function fulfill(bytes32 _requestId, bool _result) public recordChainlinkFulfillment(_requestId)
+    function fulfill(bytes32 _requestId, uint256 _result) public recordChainlinkFulfillment(_requestId)
     {
-        TEAM_MAP[focus] = _result;
-        focus = ""
+        TEAM_MAP[focus] = uint8(_result);
+        focus = "";
     }
 
-    function getTeamInfo(string _team) public view return (bool isOut) {
-        return TEAM_MAP[_team]
+    function getTeamInfo(string memory _team) public view returns (uint8 whenOut) {
+        return TEAM_MAP[_team];
     }
     
     /**
