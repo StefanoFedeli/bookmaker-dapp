@@ -61,7 +61,7 @@ contract APIConsumer is ChainlinkClient {
     function fulfill(bytes32 _requestId, uint256 _result) public recordChainlinkFulfillment(_requestId)
     {
         TEAM_MAP[focus] = uint8(_result);
-        focus = "";
+        //focus = "";
     }
 
     function getTeamInfo(string memory _team) public view returns (uint8 whenOut) {
