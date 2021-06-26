@@ -1,32 +1,36 @@
 /*
 Implements EIP20 token standard: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 .*/
-pragma solidity ^0.4.21;
+pragma solidity  ^0.6.0;
 
+import './oracle.sol';
 
 contract EURO2020 {
 
+    EURO2020API api;
+
     uint256 constant private MAX_UINT256 = 2**256 - 1;
     
-    uint256 constant private PRICE_PER_UNIT = 0.03 ether;
+    uint256 constant private PRICE_PER_UNIT = 0.003 ether;
     uint256 constant private MAX_AVALIABLE = 10;
     uint256 constant private NUM_TEAMS = 16;
     uint256 public time_start_playoff;
     uint256 public time_end_tournament;
-    address private owner;
+    address payable private owner;
     mapping (string => uint256) private TEAM_MAP;
     mapping (uint8 => uint256) private LEVELS;
     mapping (string => uint256) private PAYBACK;
     
     uint public last_offer_id;
-    uint256 constant private our_fee = 0.005 ether;
+    uint256 private offerCoins;
+    uint256 constant private our_fee = 0.00005 ether;
     bool locked;
     mapping (uint => OfferInfo) private offers_map;
     struct OfferInfo {
         uint256  price;
         uint256  amount;
         string   pair;
-        address  owner;
+        address payable owner;
         uint64   timestamp;
     }
 
@@ -62,16 +66,19 @@ contract EURO2020 {
         TEAM_MAP['GER'] = MAX_AVALIABLE;
         TEAM_MAP['ENG'] = MAX_AVALIABLE;
         
-        LEVELS[0] = 1;
-        LEVELS[1] = 2;
-        LEVELS[2] = 4;
-        LEVELS[3] = 16;
-        LEVELS[4] = 50;
+        LEVELS[0] = 0;
+        LEVELS[1] = 1;
+        LEVELS[2] = 2;
+        LEVELS[3] = 4;
+        LEVELS[4] = 16;
+        LEVELS[5] = 50;
         
         time_end_tournament =  now + 18 days; 
         time_start_playoff = now + 3 days;
         owner = msg.sender;
         balances[owner] = totalSupply;
+
+        api = EURO2020API(0x28CA76a5c0a50D3fbd8999b1336Eb9d01677f699);
     }
     
     /*
@@ -92,8 +99,8 @@ contract EURO2020 {
     /*
     * BOOKMAKER FUNCTIONs
     */
-    function place_bet(string _team, uint256 _amount) public payable returns (bool success) {
-        require(now <= time_start_playoff);
+    function place_bet(string memory _team, uint256 _amount) public payable returns (bool success) {
+        //require(now <= time_start_playoff);
         require(msg.value >= _amount * PRICE_PER_UNIT);
         require(TEAM_MAP[_team] >= _amount);
         TEAM_MAP[_team] -= _amount;
@@ -111,8 +118,7 @@ contract EURO2020 {
         return true;
     }
     
-    function oracle(string _team, uint8 _level) public returns (bool success) {
-        require(msg.sender == owner);
+    function oracle(string memory _team, uint8 _level) private returns (bool success) {
         if (TEAM_MAP[_team] == MAX_AVALIABLE){
             PAYBACK[_team] = 0;
         } else {
@@ -121,16 +127,24 @@ contract EURO2020 {
         return true;
     }
     
-    function collect_bet(string _team) public returns (bool success) {
-        require(now >= time_end_tournament );
+    function collect_bet(string memory _team) public returns (bool success) {
+        //require(now >= time_end_tournament );
         require(bets[msg.sender][_team] >= 1);
+
+        PAYBACK[_team] = api.getTeamInfo(_team);
+        if (PAYBACK[_team] == 0) {
+            api.isTeamOutAtStage(_team);
+        }
+
+        oracle(_team,api.getTeamInfo(_team));
+        require(PAYBACK[_team] != 0);
+
         uint256 amount = bets[msg.sender][_team];
         bets[msg.sender][_team] = 0 ;
         balances[owner] += amount;
         balances[msg.sender] -= amount;
         msg.sender.transfer(PAYBACK[_team] * amount);
         return true;
-        
     }
     
     
@@ -162,7 +176,7 @@ contract EURO2020 {
         return offers_map[id].owner;
     }
     
-    function getOfferInfo(uint id) public view returns (string, uint256, uint256) {
+    function getOfferInfo(uint id) public view returns (string memory, uint256, uint256) {
       OfferInfo memory offer = offers_map[id];
       return (offer.pair, offer.price, offer.amount);
     }
@@ -185,10 +199,10 @@ contract EURO2020 {
 
         bets[offer.owner][offer.pair] -= quantity;
         bets[msg.sender][offer.pair] += quantity;
-        balances[offer.owner] -= quantity;
+        offerCoins -= quantity;
         balances[msg.sender] += quantity;
         offers_map[id].amount -= quantity;
-        address(offer.owner).transfer(to_spend - our_fee * quantity);
+        offer.owner.transfer(to_spend - our_fee * quantity);
         
         if (offers_map[id].amount == 0) {
           delete offers_map[id];
@@ -200,15 +214,19 @@ contract EURO2020 {
     // Cancel an offer. Refunds offer maker.
     function cancel_offer(uint id) public can_cancel(id) synchronized returns (bool success) {
         // read-only offer. Modify an offer by directly accessing offers[id]
+        require(offers_map[id].owner == msg.sender);
+        balances[msg.sender] += offers_map[id].amount;
+        offerCoins -= offers_map[id].amount;
         delete offers_map[id];
         return true;
     }
 
     // Make a new offer. Takes funds from the caller into market escrow.
-    function sell(string pair, uint256 price, uint256 amount) public synchronized returns (uint256 id) {
+    function sell(string memory pair, uint256 price, uint256 amount) public synchronized returns (uint256 id) {
         require(price > 0);
         require(amount > 0);
         require(bets[msg.sender][pair] >= amount);
+        require(balances[msg.sender] > 0);
 
         OfferInfo memory info;
         info.pair = pair;
@@ -217,20 +235,23 @@ contract EURO2020 {
         info.owner = msg.sender;
         info.timestamp = uint64(now);
         id = _next_id();
+        balances[msg.sender] -= amount;
+        offerCoins += amount;
         offers_map[id] = info;
+        
 
         return id;
     }
     
-    function getNumberTokensOnTeam(address _address, string _team) public view returns (uint256){
+    function getNumberTokensOnTeam(address _address, string memory _team) public view returns (uint256){
         return bets[_address][_team];
     }
     
-    function getTeamNames() public pure returns (string){
+    function getTeamNames() public pure returns (string memory){
         return "Teams: ENG, ITA, FRA, GER, WAL, SWI, BEL, DEN, NED, AUS, UKR, CRO, RCZ, SWE, SPA, POR";
     }
     
-    function getAvailableTokensOnTeam(string _team) public view returns (uint256){
+    function getAvailableTokensOnTeam(string memory _team) public view returns (uint256){
         return TEAM_MAP[_team];
     }
     

@@ -4,27 +4,29 @@ pragma solidity ^0.6.0;
 
 import "https://raw.githubusercontent.com/smartcontractkit/chainlink/master/evm-contracts/src/v0.6/ChainlinkClient.sol";
 
-contract APIConsumer is ChainlinkClient {
-  
-    uint256 public volume;
+contract EURO2020API is ChainlinkClient {
     
     address private oracle;
     bytes32 private jobId;
     uint256 private fee;
     string private focus;
+    string private URL;
+    address private owner;
     mapping (string => uint8) private TEAM_MAP;
     
     /**
      * Network: Kovan
-     * Chainlink - 0x2f90A6D021db21e1B2A077c5a37B3C7E75D15b7e
-     * Chainlink - 29fa9aa13bf1468788b7cc4a500a45b8
+     * Chainlink Contract - 0x56dd6586DB0D08c6Ce7B2f2805af28616E082455
+     * Chainlink      Job - b6602d14e4734c49a5e1ce19d45a4632
      * Fee: 0.1 LINK
      */
     constructor() public {
         setPublicChainlinkToken();
-        oracle = 0x83F00b902cbf06E316C95F51cbEeD9D2572a349a;
-        jobId = "c179a8180e034cf5a341488406c32827";
+        oracle = 0x56dd6586DB0D08c6Ce7B2f2805af28616E082455;
+        jobId = "b6602d14e4734c49a5e1ce19d45a4632";
         fee = 0.1 * 10 ** 18; // 0.1 LINK
+        URL = "https://api.jsonbin.io/b/60d6089f8a4cd025b7a596d2";
+        owner = msg.sender;
     }
     
     /**
@@ -40,15 +42,17 @@ contract APIConsumer is ChainlinkClient {
      *                                                                                  *
      ************************************************************************************/
     function isTeamOutAtStage(string memory _team) public returns (bytes32 requestId) {
+        require(TEAM_MAP[_team]==0);
+        //require(msg.sender == contractaddress);
+        focus = _team;
 
         Chainlink.Request memory request = buildChainlinkRequest(jobId, address(this), this.fulfill.selector);
-        focus = _team;
         
         // Set the URL to perform the GET request on
-        request.add("get", "https://raw.githubusercontent.com/StefanoFedeli/bookmaker-dapp/master/contracts/EURO2020.json");
+        request.add("get", URL);
         
         // Set the path to find the desired data in the API response, where the response format is:
-        // {"ITA": true, "ENG": false, ....}
+        // {"ITA": 10, "ENG": 1, ....}
         request.add("path", _team);
         
         // Sends the request
@@ -61,7 +65,6 @@ contract APIConsumer is ChainlinkClient {
     function fulfill(bytes32 _requestId, uint256 _result) public recordChainlinkFulfillment(_requestId)
     {
         TEAM_MAP[focus] = uint8(_result);
-        //focus = "";
     }
 
     function getTeamInfo(string memory _team) public view returns (uint8 whenOut) {
@@ -75,7 +78,13 @@ contract APIConsumer is ChainlinkClient {
      * THIS IS PURELY FOR EXAMPLE PURPOSES ONLY.
      */
     function withdrawLink() external {
+        require(msg.sender==owner);
         LinkTokenInterface linkToken = LinkTokenInterface(chainlinkTokenAddress());
         require(linkToken.transfer(msg.sender, linkToken.balanceOf(address(this))), "Unable to transfer");
+    }
+    
+    function changeURL(string memory _newURL) public {
+        require(msg.sender==owner);
+        URL = _newURL;
     }
 }
