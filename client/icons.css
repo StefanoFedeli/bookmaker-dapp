@@ -1,0 +1,9 @@
+.bet-icon {
+    display: inline-block;
+    height:32px;
+    width:32px;
+    background-size:32px;
+}
+.ITA {
+    background-image:url(icons/Italy.png);
+}

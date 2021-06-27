@@ -5,11 +5,62 @@
     <title>
         {put your title here}
     </title>
-    <link rel="stylesheet" type="text/css" media="all" href="default.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">  <!-- https://picnicss.com/documentation -->
+    <link rel="stylesheet" href="icons.css">
     <script src="web3.min.js" type="text/javascript"></script>
     <script src="dapp.js" type="text/javascript"></script>
   </head>
 <body>
-<div id="meta-mask-required"></div>
-  </body>
+  <nav class="demo">
+    <a href="#" class="brand">
+      <img class="logo" src="favicon.ico" />
+      <span>EURO 2020 - Blockchain Bets!</span>
+    </a>
+  
+    <!-- responsive-->
+    <input id="bmenub" type="checkbox" class="show">
+    <label for="bmenub" class="burger pseudo button">Menu</label>
+  
+    <div class="menu">
+      <a href="#bet" class="pseudo button icon-puzzle">Bet</a>
+      <a href="https://www.diretta.it/calcio/europa/europei/classifiche/" class="button icon-help-circled">See Results</a>
+    </div>
+  </nav>
+  <div id="meta-mask-required"></div>
+
+  <section id="status" style="width: 50%; margin: 60px 25%;">
+    <article class="card" id="eth.account">
+      <header>
+        <h3>Your situation</h3>
+      </header>
+      <p>Address: <span id="eth.addr"></span></p>
+      <p>Budget: <span id="eth.eth"></span>  ETH</p>
+      <p>Bets:</p>
+    </article>    
+  </section>
+
+  <div class="flex two demo">
+    <div id="bet">
+      <h3>BET ON THE TEAM YOU PREFER</h3>
+      <select id="teamToBetOn">
+        <option value="ITA">ITA</option>
+        <option value="ENG">ENG</option>
+        <option value="WAL">WAL</option>
+      </select>
+      <input type="number" id="qty_bet" placeholder="How many token you want?" name="qty_bet" min="1" max="10">
+      <button class="stack icon-paper-plane" onclick="bet()">BET!</button>
+    </div>
+    <div id="bet">
+      <h3>GET YOUR CASH</h3>
+      <select id="teamToCash">
+        <option value="ITA">ITA</option>
+        <option value="ENG">ENG</option>
+        <option value="WAL">WAL</option>
+      </select>
+      <button class="stack icon-paper-plane" onclick="cashback()">RISCUOTI!</button>
+    </div>
+  </div>
+ 
+</div>
+</body>
 </html>
