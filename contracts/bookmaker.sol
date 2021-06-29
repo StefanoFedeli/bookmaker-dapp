@@ -186,7 +186,7 @@ contract EURO2020 {
         return last_offer_id;
     }
     
-    function buy(uint256 id, uint8 quantity) public payable can_buy(id) synchronized returns (bool) {
+    function buy(uint256 id, uint8 quantity) public payable can_buy(id) synchronized returns (bool success) {
         
         OfferInfo memory offer = offers_map[id];
         uint256 to_spend = quantity * offer.price;
@@ -222,7 +222,7 @@ contract EURO2020 {
     }
 
     // Make a new offer. Takes funds from the caller into market escrow.
-    function sell(string memory pair, uint256 price, uint256 amount) public synchronized returns (uint256 id) {
+    function sell(string memory pair, uint256 price, uint256 amount) public synchronized returns (bool success) {
         require(price > 0);
         require(amount > 0);
         require(bets[msg.sender][pair] >= amount);
@@ -240,7 +240,7 @@ contract EURO2020 {
         offers_map[id] = info;
         
 
-        return id;
+        return true;
     }
     
     function getNumberTokensOnTeam(address _address, string memory _team) public view returns (uint256){
