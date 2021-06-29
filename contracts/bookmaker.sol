@@ -12,8 +12,8 @@ contract EURO2020 {
     uint256 constant private MAX_UINT256 = 2**256 - 1;
     
     uint256 constant private PRICE_PER_UNIT = 0.003 ether;
-    uint256 constant private MAX_AVALIABLE = 10;
-    uint256 constant private NUM_TEAMS = 16;
+    uint256 constant private MAX_AVALIABLE = 20;
+    uint256 constant private NUM_TEAMS = 8;
     uint256 public time_start_playoff;
     uint256 public time_end_tournament;
     address payable private owner;
@@ -42,7 +42,7 @@ contract EURO2020 {
     They allow one to customise the token contract & in no way influences the core functionality.
     Some wallets/interfaces might not even bother to look at this information.
     */
-    string public name = "Project Blockchain Polimi";                   //fancy name: eg Simon Bucks
+    string public name = "Euro Football bets";                   //fancy name: eg Simon Bucks
     uint8 public decimals = 0;                //How many decimals to show.
     string public symbol = "EURO2020";                 //An identifier: eg SBX
     uint256 public totalSupply;
@@ -50,31 +50,24 @@ contract EURO2020 {
     constructor() public { 
         totalSupply = MAX_AVALIABLE*NUM_TEAMS;
         TEAM_MAP['ITA'] = MAX_AVALIABLE;
-        TEAM_MAP['WAL'] = MAX_AVALIABLE;
         TEAM_MAP['SWI'] = MAX_AVALIABLE;
         TEAM_MAP['BEL'] = MAX_AVALIABLE;
         TEAM_MAP['DEN'] = MAX_AVALIABLE;
-        TEAM_MAP['NED'] = MAX_AVALIABLE;
-        TEAM_MAP['AUS'] = MAX_AVALIABLE;
         TEAM_MAP['UKR'] = MAX_AVALIABLE;
-        TEAM_MAP['CRO'] = MAX_AVALIABLE;
         TEAM_MAP['RCZ'] = MAX_AVALIABLE;
         TEAM_MAP['SWE'] = MAX_AVALIABLE;
         TEAM_MAP['SPA'] = MAX_AVALIABLE;
-        TEAM_MAP['POR'] = MAX_AVALIABLE;
-        TEAM_MAP['FRA'] = MAX_AVALIABLE;
         TEAM_MAP['GER'] = MAX_AVALIABLE;
         TEAM_MAP['ENG'] = MAX_AVALIABLE;
         
         LEVELS[0] = 0;
         LEVELS[1] = 1;
-        LEVELS[2] = 2;
-        LEVELS[3] = 4;
-        LEVELS[4] = 16;
-        LEVELS[5] = 50;
+        LEVELS[2] = 4;
+        LEVELS[3] = 16;
+        LEVELS[4] = 50;
         
-        time_end_tournament =  now + 18 days; 
-        time_start_playoff = now + 3 days;
+        time_end_tournament =  now + 10 days; 
+        time_start_playoff = now + 1 days;
         owner = msg.sender;
         balances[owner] = totalSupply;
 
