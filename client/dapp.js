@@ -588,6 +588,9 @@ window.onload = function funLoad() {
 	} else {
 		document.getElementById('meta-mask-required').innerHTML = 'You need <a href="https://metamask.io/">MetaMask</a> browser plugin to run this example'
 	}
+	
+	var new_options = [];
+	var active_offers = [];
 
 	bookmaker = new dapp.eth.Contract(ABIBookmaker,"0x683fa5AbD089c3f278DBA5604d5E74D68211aEab");
 
@@ -598,6 +601,7 @@ window.onload = function funLoad() {
 			bookmaker.methods.getNumberTokensOnTeam(myAddr,el).call().then(function(res){
 				if (res > 0) {
 					document.getElementById('eth.account').innerHTML += ("<div class='"+ el +" bet-icon'></div>")
+					new_options.push(el);
 				}
 			})
 		})
@@ -605,6 +609,57 @@ window.onload = function funLoad() {
 			document.getElementById('eth.eth').textContent = dapp.utils.fromWei(res, 'ether');
 		})
 	})
+	
+	document.getElementById("tableBody").innerHTML = "";
+	bookmaker.methods.getLastOfferId().call().then(function(res){ var lastId = res; })
+	for (let i = 0; i <= lastId ; i++) {
+	  bookmaker.methods.offer_isActive(i).call().then(function(res){ 
+	  	if (res) {
+			active_offers.push(i);
+			bookmaker.methods.getOfferInfo(i).call.then(function(res1, res2, res3){
+				document.getElementById("tableBody").append("<tr>" +
+				"<td>" + i + "</td>" +
+				"<td>" + res1 + "</td>" +
+				"<td>" + res3 + "</td>" +
+				"<td>" + res2 + "</td>" +
+				"</tr>");
+			})
+		}
+	  })
+	}
+	
+	document.getElementById('teamToCash').empty();
+
+	$each(new_options, function(value) {
+	    new Element('option')
+		.set('text', value)
+		.inject(document.getElementById('teamToCash'));
+	});
+	
+	document.getElementById('teamToOffer').empty();
+
+	$each(new_options, function(value) {
+	    new Element('option')
+		.set('text', value)
+		.inject(document.getElementById('teamToOffer'));
+	});
+	
+	document.getElementById('buyOfferID').empty();
+
+	$each(active_offers, function(value) {
+	    new Element('option')
+		.set('text', value)
+		.inject(document.getElementById('buyOfferID'));
+	});
+	
+	document.getElementById('teamToOffer').empty();
+
+	$each(active_offers, function(value) {
+	    new Element('option')
+		.set('text', value)
+		.inject(document.getElementById('teamToOffer'));
+	});	
+	
 	
 } 
 
@@ -629,6 +684,46 @@ function cashback() {
 	bookmaker.methods.collect_bet(team).send({from: myAddr}).then(function(success){
 		if (success) {
 			alert("YOU HAVE PLACED YOUR BET");
+			window.location.reload()
+		} else {
+			alert("ERROR IN THE TRANSACTION");
+		}
+	})
+}
+
+function sell() {
+	var team = document.getElementById('teamToCash').value;
+	var qty = document.getElementById('qty_sell').value;
+	var ether = (document.getElementById('price_sell').value).toString();
+	var price = dapp.utils.toWei(ether, 'ether');
+	bookmaker.methods.sell(team, price, qty).send({from: myAddr}).then(function(success){
+		if (success) {
+			alert("YOU HAVE PUBLISHED A NEW OFFER");
+			window.location.reload()
+		} else {
+			alert("ERROR IN THE TRANSACTION");
+		}
+	})
+}
+
+function buy() {
+	var offerId = document.getElementById('buyOfferID').value;
+	var qty = document.getElementById('qty_buy').value;
+	bookmaker.methods.buy(offerId,qty).send({from: myAddr}).then(function(success){
+		if (success) {
+			alert("YOU HAVE BUY NEW TOKENS");
+			window.location.reload()
+		} else {
+			alert("ERROR IN THE TRANSACTION");
+		}
+	})
+}
+
+function cancel() {
+	var offerId = document.getElementById('cancelOfferID').value;
+	bookmaker.methods.cancel_offer(offerId,qty).send({from: myAddr}).then(function(success){
+		if (success) {
+			alert("YOU HAVE BUY NEW TOKENS");
 			window.location.reload()
 		} else {
 			alert("ERROR IN THE TRANSACTION");
