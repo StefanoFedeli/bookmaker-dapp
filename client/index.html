@@ -23,6 +23,7 @@
   
     <div class="menu">
       <a href="#bet" class="pseudo button icon-puzzle">Bet</a>
+      <a href="#offer" class="pseudo button icon-puzzle">Sell/Buy</a>
       <a href="https://www.diretta.it/calcio/europa/europei/classifiche/" class="button icon-help-circled">See Results</a>
     </div>
   </nav>
@@ -31,11 +32,50 @@
   <section id="status" style="width: 50%; margin: 60px 25%;">
     <article class="card" id="eth.account">
       <header>
-        <h3>Your situation</h3>
+        <h3>YOUR SITUATION</h3>
       </header>
       <p>Address: <span id="eth.addr"></span></p>
       <p>Budget: <span id="eth.eth"></span>  ETH</p>
       <p>Bets:</p>
+    </article>    
+  </section>
+  
+  <section id="status" style="width: 50%; margin: 60px 25%;">
+    <article class="card" id="eth.account">
+      <header>
+        <h3>ACTIVE OFFERS</h3>
+      </header>
+          <table id="offerTable" class="table table-bordered table-condensed table-striped" style="width:100%">
+            <colgroup>
+               <col span="1" style="width: 30%;">
+               <col span="1" style="width: 30%;">
+               <col span="1" style="width: 30%;">
+               <col span="1" style="width: 30%;">
+            </colgroup>
+            <thead>
+                <tr>
+                  <th>OfferId</th>
+                  <th>Team</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                  <td>1</td>
+                  <td>ITA</td>
+                  <td>2</td>
+                  <td>0.004</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>ENG</td>
+                  <td>3</td>
+                  <td>0.005</td>
+                </tr>
+            </tbody>
+          </table>
+
     </article>    
   </section>
 
@@ -59,7 +99,7 @@
       </select>
       <button class="stack icon-paper-plane" onclick="cashback()">RETRIEVE!</button>
     </div>
-    <div id="bet">
+    <div id="offer">
       <h3>PUBLISH AN OFFER</h3>
       <select id="teamToOffer">
         <option value="ITA">ITA</option>
@@ -70,7 +110,7 @@
       <input type="number" id="price_sell" placeholder="Fix the price per token (Ether)" name="price_sell" min="1" max="10">
       <button class="stack icon-paper-plane" onclick="sell()">SELL!</button>
     </div>
-    <div id="bet">
+    <div id="offer">
       <h3>BUY FROM AN OFFER</h3>
       <select id="buyOfferID">
         <option value="1">1</option>
@@ -80,7 +120,7 @@
       <input type="number" id="qty_buy" placeholder="How many token do you want to buy?" name="qty_buy" min="1" max="10">
       <button class="stack icon-paper-plane" onclick="buy()">BUY!</button>
     </div>
-    <div id="bet">
+    <div id="offer">
       <h3>CANCEL AN OFFER</h3>
       <select id="cancelOfferID">
         <option value="1">1</option>
@@ -89,39 +129,7 @@
       </select>
       <button class="stack icon-paper-plane" onclick="cancel()">CANCEL!</button>
     </div>
-  </div>
-  <div class="container">
-    <div class="row">
-        <div class="col-sm-6">
-            <h3>ACTIVE OFFERS</h2>
-        </div>
-    </div>
-    <table id="offerTable" class="table table-bordered table-condensed table-striped">
-        <thead>
-            <tr>
-              <th>OfferId</th>
-              <th>Team</th>
-              <th>Quantity</th>
-              <th>Price</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <tr>
-              <td>1</td>
-              <td>ITA</td>
-              <td>2</td>
-              <td>0.004</td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>ENG</td>
-              <td>3</td>
-              <td>0.005</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-   
+  </div>   
 </div>
 </body>
 </html>
