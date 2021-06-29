@@ -267,4 +267,8 @@ contract EURO2020 {
         return PRICE_PER_UNIT;
     }
     
+    function getLastOfferId() public view returns (uint){
+        return last_offer_id;
+    }
+    
 }
