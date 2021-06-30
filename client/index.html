@@ -41,7 +41,7 @@
   </section>
   
   <section id="status" style="width: 50%; margin: 60px 25%;">
-    <article class="card" id="eth.account">
+    <article class="card">
       <header>
         <h3>ACTIVE OFFERS</h3>
       </header>
@@ -58,6 +58,7 @@
                   <th>Team</th>
                   <th>Quantity</th>
                   <th>Price</th>
+                  <th>Cancel</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -66,12 +67,14 @@
                   <td>ITA</td>
                   <td>2</td>
                   <td>0.004</td>
+                  <td><button onclick="cancel(2)">Cancel</button></td>
                 </tr>
                 <tr>
                   <td>2</td>
                   <td>ENG</td>
                   <td>3</td>
                   <td>0.005</td>
+                  <td><button onclick="cancel(1)">Cancel</button></td>
                 </tr>
             </tbody>
           </table>
@@ -83,9 +86,6 @@
     <div id="bet">
       <h3>BET ON THE TEAM YOU PREFER</h3>
       <select id="teamToBetOn">
-        <option value="ITA">ITA</option>
-        <option value="ENG">ENG</option>
-        <option value="WAL">WAL</option>
       </select>
       <input type="number" id="qty_bet" placeholder="How many token you want?" name="qty_bet" min="1" max="10">
       <button class="stack icon-paper-plane" onclick="bet()">BET!</button>
@@ -93,18 +93,12 @@
     <div id="bet">
       <h3>GET YOUR CASH</h3>
       <select id="teamToCash">
-        <option value="ITA">ITA</option>
-        <option value="ENG">ENG</option>
-        <option value="WAL">WAL</option>
       </select>
       <button class="stack icon-paper-plane" onclick="cashback()">RETRIEVE!</button>
     </div>
     <div id="offer">
       <h3>PUBLISH AN OFFER</h3>
       <select id="teamToOffer">
-        <option value="ITA">ITA</option>
-        <option value="ENG">ENG</option>
-        <option value="WAL">WAL</option>
       </select>
       <input type="number" id="qty_sell" placeholder="How many token do you want to sell?" name="qty_sell" min="1" max="10">
       <input type="number" id="price_sell" placeholder="Fix the price per token (Ether)" name="price_sell" min="1" max="10">
@@ -113,21 +107,9 @@
     <div id="offer">
       <h3>BUY FROM AN OFFER</h3>
       <select id="buyOfferID">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
       </select>
       <input type="number" id="qty_buy" placeholder="How many token do you want to buy?" name="qty_buy" min="1" max="10">
       <button class="stack icon-paper-plane" onclick="buy()">BUY!</button>
-    </div>
-    <div id="offer">
-      <h3>CANCEL AN OFFER</h3>
-      <select id="cancelOfferID">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-      </select>
-      <button class="stack icon-paper-plane" onclick="cancel()">CANCEL!</button>
     </div>
   </div>   
 </div>

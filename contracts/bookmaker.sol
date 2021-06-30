@@ -176,9 +176,9 @@ contract EURO2020 {
         return offers_map[id].owner;
     }
     
-    function getOfferInfo(uint id) public view returns (string memory, uint256, uint256) {
+    function getOfferInfo(uint id) public view returns (uint, string memory, uint256, uint256, address) {
       OfferInfo memory offer = offers_map[id];
-      return (offer.pair, offer.price, offer.amount);
+      return (id, offer.pair, offer.amount, offer.price, offer.owner);
     }
     
     function _next_id() internal returns (uint) {
@@ -234,7 +234,7 @@ contract EURO2020 {
         info.amount = amount;
         info.owner = msg.sender;
         info.timestamp = uint64(now);
-        id = _next_id();
+        uint id = _next_id();
         balances[msg.sender] -= amount;
         offerCoins += amount;
         offers_map[id] = info;

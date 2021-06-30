@@ -186,7 +186,7 @@ var ABIBookmaker = [
 		"outputs": [
 			{
 				"internalType": "bool",
-				"name": "",
+				"name": "success",
 				"type": "bool"
 			}
 		],
@@ -277,6 +277,19 @@ var ABIBookmaker = [
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "getLastOfferId",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -311,6 +324,11 @@ var ABIBookmaker = [
 		"name": "getOfferInfo",
 		"outputs": [
 			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
 				"internalType": "string",
 				"name": "",
 				"type": "string"
@@ -324,6 +342,11 @@ var ABIBookmaker = [
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
 			}
 		],
 		"stateMutability": "view",
@@ -464,9 +487,9 @@ var ABIBookmaker = [
 		"name": "sell",
 		"outputs": [
 			{
-				"internalType": "uint256",
-				"name": "id",
-				"type": "uint256"
+				"internalType": "bool",
+				"name": "success",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "nonpayable",
@@ -553,7 +576,9 @@ var ABIBookmaker = [
 var dapp;
 var bookmaker;
 var myAddr;
-var teams = ["ITA","ENG","WAL"]
+var teams = ["ITA","ENG","WAL", "FRA", "GER", "SWI", "BEL", "DEN", "NED", "AUS", "UKR", "CRO", "RCZ", "SWE", "SPA", "POR"];
+var new_options = [];
+var active_offers = {};
 
 
 
@@ -588,11 +613,8 @@ window.onload = function funLoad() {
 	} else {
 		document.getElementById('meta-mask-required').innerHTML = 'You need <a href="https://metamask.io/">MetaMask</a> browser plugin to run this example'
 	}
-	
-	var new_options = [];
-	var active_offers = [];
 
-	bookmaker = new dapp.eth.Contract(ABIBookmaker,"0x683fa5AbD089c3f278DBA5604d5E74D68211aEab");
+	bookmaker = new dapp.eth.Contract(ABIBookmaker,"0xDa5A0cfc860247aAD51a07Ca38e04EA3be1682d6");
 
 	dapp.eth.getAccounts().then( function(result) {
 		myAddr = result[0]
@@ -602,7 +624,10 @@ window.onload = function funLoad() {
 				if (res > 0) {
 					document.getElementById('eth.account').innerHTML += ("<div class='"+ el +" bet-icon'></div>")
 					new_options.push(el);
+					document.getElementById('teamToOffer').innerHTML += ("<option value='"+ el +"'>"+ el +"</option>")
+					document.getElementById('teamToCash').innerHTML += ("<option value='"+ el +"'>"+ el +"</option>")
 				}
+				document.getElementById('teamToBetOn').innerHTML += ("<option value='"+ el +"'>"+ el +"</option>")
 			})
 		})
 		dapp.eth.getBalance(myAddr).then( function(res) {
@@ -611,55 +636,30 @@ window.onload = function funLoad() {
 	})
 	
 	document.getElementById("tableBody").innerHTML = "";
-	bookmaker.methods.getLastOfferId().call().then(function(res){ var lastId = res; })
-	for (let i = 0; i <= lastId ; i++) {
-	  bookmaker.methods.offer_isActive(i).call().then(function(res){ 
-	  	if (res) {
-			active_offers.push(i);
-			bookmaker.methods.getOfferInfo(i).call.then(function(res1, res2, res3){
-				document.getElementById("tableBody").append("<tr>" +
-				"<td>" + i + "</td>" +
-				"<td>" + res1 + "</td>" +
-				"<td>" + res3 + "</td>" +
-				"<td>" + res2 + "</td>" +
-				"</tr>");
+	bookmaker.methods.getLastOfferId().call().then(function(res){ 
+		var lastId = res; 
+		for (let i = 0; i <= lastId ; i++) {
+			bookmaker.methods.getOfferInfo(i).call().then(function(res){ 
+				if (res[2] != "0") {
+					active_offers[res[0]] = res[3];
+					var htmlToAdd = "<tr>" +
+					"<td>" + res[0] + "</td>" +
+					"<td>" + res[1] + "</td>" +
+					"<td>" + res[2] + "</td>" +
+					"<td>" + dapp.utils.fromWei(res[3]) + "</td>";
+					if (myAddr == res[4]) {
+						htmlToAdd += "<td><button onclick='cancel("+res[0]+")'>Cancel</button></td>";
+					} else {
+						
+					}
+					document.getElementById('buyOfferID').innerHTML += ("<option value='"+ res[0] +"'>"+ res[0] +"</option>")
+					htmlToAdd += "</tr>";
+					document.getElementById("tableBody").innerHTML += htmlToAdd;
+				}
+				
 			})
 		}
-	  })
-	}
-	
-	document.getElementById('teamToCash').empty();
-
-	$each(new_options, function(value) {
-	    new Element('option')
-		.set('text', value)
-		.inject(document.getElementById('teamToCash'));
-	});
-	
-	document.getElementById('teamToOffer').empty();
-
-	$each(new_options, function(value) {
-	    new Element('option')
-		.set('text', value)
-		.inject(document.getElementById('teamToOffer'));
-	});
-	
-	document.getElementById('buyOfferID').empty();
-
-	$each(active_offers, function(value) {
-	    new Element('option')
-		.set('text', value)
-		.inject(document.getElementById('buyOfferID'));
-	});
-	
-	document.getElementById('teamToOffer').empty();
-
-	$each(active_offers, function(value) {
-	    new Element('option')
-		.set('text', value)
-		.inject(document.getElementById('teamToOffer'));
-	});	
-	
+	})
 	
 } 
 
@@ -696,6 +696,7 @@ function sell() {
 	var qty = document.getElementById('qty_sell').value;
 	var ether = (document.getElementById('price_sell').value).toString();
 	var price = dapp.utils.toWei(ether, 'ether');
+	console.log(qty,ether,price)
 	bookmaker.methods.sell(team, price, qty).send({from: myAddr}).then(function(success){
 		if (success) {
 			alert("YOU HAVE PUBLISHED A NEW OFFER");
@@ -709,9 +710,10 @@ function sell() {
 function buy() {
 	var offerId = document.getElementById('buyOfferID').value;
 	var qty = document.getElementById('qty_buy').value;
-	bookmaker.methods.buy(offerId,qty).send({from: myAddr}).then(function(success){
+	var price = active_offers[offerId] * qty;
+	bookmaker.methods.buy(offerId,qty).send({from: myAddr, value: price}).then(function(success){
 		if (success) {
-			alert("YOU HAVE BUY NEW TOKENS");
+			alert("YOU HAVE BOUGHT NEW TOKENS");
 			window.location.reload()
 		} else {
 			alert("ERROR IN THE TRANSACTION");
@@ -719,11 +721,10 @@ function buy() {
 	})
 }
 
-function cancel() {
-	var offerId = document.getElementById('cancelOfferID').value;
-	bookmaker.methods.cancel_offer(offerId,qty).send({from: myAddr}).then(function(success){
+function cancel(offerId) {
+	bookmaker.methods.cancel_offer(offerId).send({from: myAddr}).then(function(success){
 		if (success) {
-			alert("YOU HAVE BUY NEW TOKENS");
+			alert("YOU HAVE CANCELED YOUR OFFER");
 			window.location.reload()
 		} else {
 			alert("ERROR IN THE TRANSACTION");
