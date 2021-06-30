@@ -1,6 +1,7 @@
 /*
 Implements EIP20 token standard: https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
 .*/
+
 pragma solidity  ^0.6.0;
 
 import './oracle.sol';
@@ -12,8 +13,8 @@ contract EURO2020 {
     uint256 constant private MAX_UINT256 = 2**256 - 1;
     
     uint256 constant private PRICE_PER_UNIT = 0.003 ether;
-    uint256 constant private MAX_AVALIABLE = 10;
-    uint256 constant private NUM_TEAMS = 16;
+    uint256 constant private MAX_AVALIABLE = 20;
+    uint256 constant private NUM_TEAMS = 8;
     uint256 public time_start_playoff;
     uint256 public time_end_tournament;
     address payable private owner;
@@ -36,45 +37,30 @@ contract EURO2020 {
 
     mapping (address => uint256) public balances;
     mapping (address => mapping (string => uint256)) private bets;
-    /*
-    NOTE:
-    The following variables are OPTIONAL vanities. One does not have to include them.
-    They allow one to customise the token contract & in no way influences the core functionality.
-    Some wallets/interfaces might not even bother to look at this information.
-    */
-    string public name = "Project Blockchain Polimi";                   //fancy name: eg Simon Bucks
-    uint8 public decimals = 0;                //How many decimals to show.
-    string public symbol = "EURO2020";                 //An identifier: eg SBX
+
+    string public name = "Euro Football bets";  //fancy name: eg Simon Bucks
+    string public symbol = "EURO2020";         //An identifier: eg SBX
     uint256 public totalSupply;
 
     constructor() public { 
         totalSupply = MAX_AVALIABLE*NUM_TEAMS;
         TEAM_MAP['ITA'] = MAX_AVALIABLE;
-        TEAM_MAP['WAL'] = MAX_AVALIABLE;
-        TEAM_MAP['SWI'] = MAX_AVALIABLE;
+        TEAM_MAP['SUI'] = MAX_AVALIABLE;
         TEAM_MAP['BEL'] = MAX_AVALIABLE;
         TEAM_MAP['DEN'] = MAX_AVALIABLE;
-        TEAM_MAP['NED'] = MAX_AVALIABLE;
-        TEAM_MAP['AUS'] = MAX_AVALIABLE;
         TEAM_MAP['UKR'] = MAX_AVALIABLE;
-        TEAM_MAP['CRO'] = MAX_AVALIABLE;
-        TEAM_MAP['RCZ'] = MAX_AVALIABLE;
-        TEAM_MAP['SWE'] = MAX_AVALIABLE;
-        TEAM_MAP['SPA'] = MAX_AVALIABLE;
-        TEAM_MAP['POR'] = MAX_AVALIABLE;
-        TEAM_MAP['FRA'] = MAX_AVALIABLE;
-        TEAM_MAP['GER'] = MAX_AVALIABLE;
+        TEAM_MAP['CZE'] = MAX_AVALIABLE;
+        TEAM_MAP['ESP'] = MAX_AVALIABLE;
         TEAM_MAP['ENG'] = MAX_AVALIABLE;
         
         LEVELS[0] = 0;
-        LEVELS[1] = 1;
-        LEVELS[2] = 2;
-        LEVELS[3] = 4;
-        LEVELS[4] = 16;
-        LEVELS[5] = 50;
+        LEVELS[1] = 5;
+        LEVELS[2] = 10;
+        LEVELS[3] = 20;
+        LEVELS[4] = 60;
         
-        time_end_tournament =  now + 18 days; 
-        time_start_playoff = now + 3 days;
+        time_end_tournament =  now + 10 days; 
+        time_start_playoff = now + 1 days;
         owner = msg.sender;
         balances[owner] = totalSupply;
 
@@ -190,6 +176,7 @@ contract EURO2020 {
         
         OfferInfo memory offer = offers_map[id];
         uint256 to_spend = quantity * offer.price;
+        
         require(bets[offer.owner][offer.pair] >= quantity);
         require(to_spend <= address(this).balance);
         require(to_spend <= msg.value);
@@ -211,12 +198,14 @@ contract EURO2020 {
         return true;
     }
     
-    // Cancel an offer. Refunds offer maker.
+    // Cancel an offer.
     function cancel_offer(uint id) public can_cancel(id) synchronized returns (bool success) {
         // read-only offer. Modify an offer by directly accessing offers[id]
         require(offers_map[id].owner == msg.sender);
-        balances[msg.sender] += offers_map[id].amount;
+        require(offerCoins >= offers_map[id].amount);
+
         offerCoins -= offers_map[id].amount;
+        balances[msg.sender] += offers_map[id].amount;
         delete offers_map[id];
         return true;
     }
@@ -248,7 +237,7 @@ contract EURO2020 {
     }
     
     function getTeamNames() public pure returns (string memory){
-        return "Teams: ENG, ITA, FRA, GER, WAL, SWI, BEL, DEN, NED, AUS, UKR, CRO, RCZ, SWE, SPA, POR";
+        return "Teams: ENG, ITA, SUI, BEL, DEN, UKR, CZE, ESP";
     }
     
     function getAvailableTokensOnTeam(string memory _team) public view returns (uint256){
