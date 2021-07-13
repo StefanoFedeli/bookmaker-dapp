@@ -5,26 +5,26 @@
     background-size:32px;
 }
 .ITA {
-    background-image:url(icons/Italy.png);
+    background-image:url("icons/Italy.png");
 }
 .ENG {
-    background-image:url(icons/England.png);
+    background-image:url("icons/England.png");
 }
 .SUI {
-    background-image:url(icons/Switzerland.png);
+    background-image:url("icons/Switzerland.png");
 }
 .BEL {
-    background-image:url(icons/Belgium.png);
+    background-image:url("icons/Belgium.png");
 }
 .DEN {
-    background-image:url(icons/Denmark.png);
+    background-image:url("icons/Denmark.png");
 }
 .UKR {
-    background-image:url(icons/Ukraine.png);
+    background-image:url("icons/Ukraine.png");
 }
 .CZE {
-    background-image:url(icons/Czech Republic.png);
+    background-image:url("icons/Czech Republic.png");
 }
 .ESP {
-    background-image:url(icons/Spain.png);
+    background-image:url("icons/Spain.png");
 }
